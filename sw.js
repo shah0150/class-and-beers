@@ -1,37 +1,64 @@
 const version = 1;
-const cacheName = `YourNameHere-${version}`;
-const staticFiles = [];
+const cacheName = `shah0150-${version}`;
+const staticFiles = [
+  // Add your static files here
+  '/',
+  '/index.html',
+  '/css/main.css',
+  '/js/main.js',
+  // Add other files that you want to cache initially
+];
 
 self.addEventListener('install', (ev) => {
-    //if you have an array of files then addAll() here
     ev.waitUntil(
-      caches.open(cacheName).then((cache) => {
-        cache.addAll(staticFiles);
-      })
+        caches.open(cacheName).then((cache) => {
+            return cache.addAll(staticFiles);
+        })
     );
 });
+
 self.addEventListener('activate', (ev) => {
-  //delete old version
-  ev.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(keys.map((key) => caches.delete(key)));
-    })
-  );
+    ev.waitUntil(
+        caches.keys().then((keys) => {
+            return Promise.all(
+                keys.map((key) => {
+                    if (key !== cacheName) {
+                        return caches.delete(key);
+                    }
+                })
+            );
+        })
+    );
 });
+
 self.addEventListener('fetch', (ev) => {
-  //try the cache first, then fetch and save copy in cache
+    ev.respondWith(cacheFirstAndSave(ev));
 });
 
 function cacheFirst(ev) {
-  //try cache then fetch
-  return caches.match(ev.request).then((cacheResponse) => {
-    return cacheResponse || fetch(ev.request);
-  });
+    // Try cache then fetch
+    return caches.match(ev.request).then((cacheResponse) => {
+        return cacheResponse || fetch(ev.request);
+    });
 }
+
 function cacheFirstAndSave(ev) {
-  //try cache then fetch
+    return caches.match(ev.request).then((cacheResponse) => {
+        if (cacheResponse) {
+            return cacheResponse;
+        }
+        return fetch(ev.request).then((networkResponse) => {
+            return caches.open(cacheName).then((cache) => {
+                cache.put(ev.request, networkResponse.clone());
+                return networkResponse;
+            });
+        });
+    }).catch(() => {
+        return response404();
+    });
 }
+
 function response404() {
-  //any generic 404 error that we want to generate
-  return new Response(null, { status: 404 });
+    // Any generic 404 error that we want to generate
+    return new Response(null, { status: 404 });
 }
