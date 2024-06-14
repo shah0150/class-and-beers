@@ -12,7 +12,7 @@
 
 function getData() {
   //fetch some data then add it to #datalist on the page.
-  let url = 'https://random-data-api.com/api/v2/beers?size=10';
+  let url = 'https://random-data-api.com/api/v2/beers?size=6';
   fetch(url)
     .then((resp) => {
       if (!resp.ok) throw new Error('Failed to fetch data');
