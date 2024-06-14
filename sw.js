@@ -1,5 +1,5 @@
 const version = 1;
-const cacheName = `YourNameHere-${version}`;
+const cacheName = `shah0150-${version}`;
 const staticFiles = [];
 
 self.addEventListener('install', (ev) => {
